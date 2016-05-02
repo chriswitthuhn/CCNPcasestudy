@@ -1,0 +1,112 @@
+hostname SCP-R1
+!
+no aaa new-model
+!
+logging 10.9.240.8
+!
+!
+!
+!
+no ip domain lookup
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+cts logging verbose
+!
+!
+username student privilege 15 secret cisco
+!
+!
+interface Multilink1
+ ip address 10.9.0.18 255.255.255.252
+ ppp multilink
+ ppp multilink group 1
+!
+interface Embedded-Service-Engine0/0
+ no ip address
+ shutdown
+!
+interface GigabitEthernet0/0
+ ip address 10.9.0.25 255.255.255.252
+ duplex auto
+ speed auto
+ no shutdown
+!
+interface GigabitEthernet0/1
+ ip address 10.9.0.33 255.255.255.252
+ duplex auto
+ speed auto
+ no shutdown
+!
+interface GigabitEthernet0/2
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+interface Serial0/0/0
+ no ip address
+ encapsulation ppp
+ ppp multilink
+ ppp multilink group 1
+ clock rate 2000000
+ no shutdown
+!
+interface Serial0/0/1
+ no ip address
+ encapsulation ppp
+ ppp multilink
+ ppp multilink group 1
+ clock rate 2000000
+ no shutdown
+!
+router ospf 1
+ network 10.9.0.16 0.0.0.3 area 0
+ network 10.9.0.24 0.0.0.3 area 9
+ network 10.9.0.32 0.0.0.3 area 9
+!
+!
+mgcp behavior rsip-range tgcp-only
+mgcp behavior comedia-role none
+mgcp behavior comedia-check-media-src disable
+mgcp behavior comedia-sdp-force disable
+!
+mgcp profile default
+!
+!
+!
+!
+!
+!
+!
+gatekeeper
+ shutdown
+!
+!
+!
+line con 0
+ exec-timeout 180 0
+ logging synchronous
+line aux 0
+line 2
+ no activation-character
+ no exec
+ transport preferred none
+ transport output pad telnet rlogin lapb-ta mop udptn v120 ssh
+ stopbits 1
+line vty 0 4
+ exec-timeout 180 0
+ password cisco
+ logging synchronous
+ login
+ transport input none
+line vty 5 15
+ login
+ transport input none
+!
+scheduler allocate 20000 1000
+!
+end

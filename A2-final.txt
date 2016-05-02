@@ -1,0 +1,181 @@
+hostname SCP_A2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+vtp mode transparent
+!
+aaa new-model
+aaa authentication login default group tacacs+ local
+aaa authentication enable default group tacacs+ enable
+aaa authorization exec default group tacacs+ local
+!
+!
+tacacs-server host 10.9.240.8
+tacacs-server key casestudy1
+!
+username student privilege 15 secret cisco
+!
+ip tacacs source-interface vlan 240
+!
+no ip domain-lookup
+!
+!
+logging 10.9.240.8
+!
+!
+ip dhcp snooping
+ip dhcp snooping vlan 21-24
+ip arp inspection vlan 21-24
+!
+!
+no ip dhcp snooping information option
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+spanning-tree portfast bpduguard default
+!
+vlan internal allocation policy ascending
+!
+vlan 21
+ name Facilities2
+!
+vlan 22
+ name R&D2
+!
+vlan 23
+ name Sales2
+!
+vlan 24
+ name Voice2
+!
+vlan 240
+ name Management
+!
+vlan 999
+ name BlackHole
+!
+vlan 1001
+ name Native
+!
+!
+!
+access-list 2 remark allow corporate into management
+access-list 2 permit 10.0.0.0 0.0.255.255 log
+access-list 2 permit 10.9.240.0 0.0.0.255 log
+access-list 2 deny any log
+!
+!
+!
+interface Port-channel1
+ no spanning-tree portfast
+ switchport trunk native vlan 1001
+ switchport trunk allowed vlan 21-24,240,1001
+ switchport mode trunk
+ ip dhcp snooping trust
+ ip arp inspection trust
+!
+interface Port-channel2
+ no spanning-tree portfast
+ switchport trunk native vlan 1001
+ switchport trunk allowed vlan 21-24,240,1001
+ switchport mode trunk
+ ip dhcp snooping trust
+ ip arp inspection trust
+!
+interface FastEthernet0/1
+ no spanning-tree portfast
+ switchport trunk native vlan 1001
+ switchport trunk allowed vlan 21-24,240,1001
+ switchport mode trunk
+ channel-group 1 mode desirable non-silent
+ ip dhcp snooping trust
+ ip arp inspection trust
+!
+interface FastEthernet0/2
+ no spanning-tree portfast
+ switchport trunk native vlan 1001
+ switchport trunk allowed vlan 21-24,240,1001
+ switchport mode trunk
+ channel-group 1 mode desirable non-silent
+ ip dhcp snooping trust
+ ip arp inspection trust
+!
+interface FastEthernet0/3
+ no spanning-tree portfast
+ switchport trunk native vlan 1001
+ switchport trunk allowed vlan 21-24,240,1001
+ switchport mode trunk
+ channel-group 2 mode desirable non-silent
+ ip dhcp snooping trust
+ ip arp inspection trust
+!
+interface FastEthernet0/4
+ no spanning-tree portfast
+ switchport trunk native vlan 1001
+ switchport trunk allowed vlan 21-24,240,1001
+ switchport mode trunk
+ channel-group 2 mode desirable non-silent
+ ip dhcp snooping trust
+ ip arp inspection trust
+!
+interface FastEthernet0/5
+ switchport mode access
+ ip verify source
+ ip dhcp snooping limit rate 5
+!
+interface FastEthernet0/6
+ switchport mode access
+ ip verify source
+ ip dhcp snooping limit rate 5
+!
+interface FastEthernet0/7
+ description RD
+ switchport mode access
+ ip verify source
+ ip dhcp snooping limit rate 5
+ switchport port-security mac-address sticky 
+ switchport port-security maximum 2
+ switchport port-security violation shutdown
+!
+interface FastEthernet0/8
+ description RD
+ switchport mode access
+ ip verify source
+ ip dhcp snooping limit rate 5
+ switchport port-security mac-address sticky 
+ switchport port-security maximum 2
+ switchport port-security violation shutdown
+!
+interface range FastEthernet0/9-24
+ switchport mode access
+ ip verify source
+ ip dhcp snooping limit rate 5
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan240
+ ip address 10.9.240.5 255.255.255.0
+!
+ip http server
+ip http secure-server
+!
+!
+line con 0
+ exec-timeout 180 0
+ logging synchronous
+line vty 0 4
+ exec-timeout 180 0
+ logging synchronous
+ login authentication default
+ access-class 2 in
+line vty 5 15
+ login
+!
+ntp server 10.0.0.2
+!
+end
